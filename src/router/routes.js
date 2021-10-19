@@ -29,6 +29,18 @@ const routes = [
       }
     ]
   },
+  {
+    path: '/usuarios',
+    component: () => import('layouts/MainLayout'),
+    children: [
+      {
+        path: '',
+        component: () => import('pages/Usuarios/Index'),
+        name: 'usuarios',
+        beforeEnter: auth
+      }
+    ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it

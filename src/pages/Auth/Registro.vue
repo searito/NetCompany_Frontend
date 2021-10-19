@@ -22,7 +22,11 @@
                          autofocus
                          maxlength="20"
                          counter
+                         :error="fields.nombres.error"
+                         :error-message="fields.nombres['error-message']"
+                         v-if="!loading"
                 />
+                <q-skeleton v-if="loading" class="q-my-xs" animation="fade" type="QInput"/>
               </div>
 
               <!--    Apellidos   -->
@@ -37,7 +41,11 @@
                          required
                          maxlength="20"
                          counter
+                         :error="fields.apellidos.error"
+                         :error-message="fields.apellidos['error-message']"
+                         v-if="!loading"
                 />
+                <q-skeleton v-if="loading" class="q-my-xs" animation="fade" type="QInput"/>
               </div>
 
               <!--    Correo   -->
@@ -52,7 +60,11 @@
                          maxlength="50"
                          counter
                          :rules="mailRules"
+                         :error="fields.correo.error"
+                         :error-message="fields.correo['error-message']"
+                         v-if="!loading"
                 />
+                <q-skeleton v-if="loading" class="q-my-xs" animation="fade" type="QInput"/>
               </div>
 
               <!--    Contraseña    -->
@@ -68,6 +80,9 @@
                          counter
                          maxlength="10"
                          ref="txt_pwd"
+                         :error="fields.passwd.error"
+                         :error-message="fields.passwd['error-message']"
+                         v-if="!loading"
                 >
                   <template v-slot:append>
                     <q-icon
@@ -77,6 +92,7 @@
                     />
                   </template>
                 </q-input>
+                <q-skeleton v-if="loading" class="q-my-xs" animation="fade" type="QInput"/>
               </div>
 
               <!--    Password Confirm    -->
@@ -91,6 +107,9 @@
                          :rules="ConfirmPassword"
                          counter
                          maxlength="10"
+                         :error="fields.passwd2.error"
+                         :error-message="fields.passwd2['error-message']"
+                         v-if="!loading"
                 >
                   <template v-slot:append>
                     <q-icon
@@ -100,6 +119,7 @@
                     />
                   </template>
                 </q-input>
+                <q-skeleton v-if="loading" class="q-my-xs" animation="fade" type="QInput"/>
               </div>
 
               <!--  Submit    -->
@@ -191,9 +211,22 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(res => {
-        if (res.data.status){
-          // Dialog con bienvenida
-          this.loading = false
+        switch (res.data.response) {
+          case 200:
+            this.$q.dialog({
+              html: true,
+              color: 'green',
+              title: '<div class="text-h6 text-green-10">Bienvenid@</div>',
+              message: 'Registro realizado éxitosamente. <br> Te invitamos a que realices tu primer Login.'
+            }).onOk(() => {
+              this.$router.push('/')
+            })
+            this.loading = false
+            break
+
+          case 500:
+            this.notificacion('Error', 'Ha ocurrido un problema, comunícate con el administrador', 'red-10')
+            break
         }
       }).catch(err => {
         console.error(err)
@@ -243,7 +276,10 @@ export default {
 .container
   width: 100%
   height: 100vh
-  background-color: #1976D2
+  background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url(/img/backgrounds/042.jpg)
+  background-position: center
+  background-size: cover
+  position: relative
 
 .full-center
   display: flex

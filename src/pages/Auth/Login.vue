@@ -156,7 +156,10 @@ export default {
 .container
   width: 100%
   height: 100vh
-  background-color: #1976D2
+  background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url(/img/backgrounds/012.jpg)
+  background-position: center
+  background-size: cover
+  position: relative
 
 .full-center
   display: flex

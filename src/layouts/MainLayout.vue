@@ -14,7 +14,7 @@
         <q-toolbar-title>
           Netcompany
         </q-toolbar-title>
-
+        <q-space />
         <div>
           <q-btn icon="mdi-power"
                  label="Salir"
@@ -82,16 +82,18 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { Cookies } from 'quasar'
+import { mapActions, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'MainLayout',
   data () {
     return {
       iconos: [
-        { id: 1, title: 'Clientes', icon: 'mdi-account-group', link: '/clientes'},
-        { id: 2, title: 'Planes', icon: 'mdi-web', link: '/planes' },
-        { id: 3, title: 'Pagos', icon: 'mdi-cash', link: '/pagos' },
-        { id: 4, title: 'Usuarios', icon: 'mdi-account', link: '/usuarios' },
+        { id: 1, title: 'Dashboard', icon: 'mdi-view-dashboard', link: '/dashboard'},
+        { id: 2, title: 'Clientes', icon: 'mdi-account-group', link: '/clientes'},
+        { id: 3, title: 'Planes', icon: 'mdi-web', link: '/planes' },
+        { id: 4, title: 'Pagos', icon: 'mdi-cash', link: '/pagos' },
+        { id: 5, title: 'Usuarios', icon: 'mdi-account', link: '/usuarios' },
       ],
       user: {
         name: '',
@@ -136,6 +138,22 @@ export default defineComponent({
         this.$router.push('/')
       }).onCancel(() => {})
     },
+    toggle(){
+      this.setDataViewer({
+        show: this.dataViewer.show,
+        filter: !this.dataViewer.filter,
+        allowCreate: this.dataViewer.allowCreate,
+        showForm: this.dataViewer.showForm
+      })
+    },
+    nuevo(){
+      this.setDataViewer({
+        show: this.dataViewer.show,
+        filter: this.dataViewer.filter,
+        allowCreate: this.dataViewer.allowCreate,
+        showForm: 1
+      })
+    }
   }
 })
 </script>
