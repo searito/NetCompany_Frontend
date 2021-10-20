@@ -164,23 +164,23 @@ export default {
         passwd2: { 'data': '', 'error': false, 'error-message': '' }
       },
       loading: false,
-      errores: [],
+      errores: []
     }
   },
-  setup() {
+  setup () {
     return {
       password: ref('txt_pwd'),
       isPwd: ref(true),
     }
   },
   computed: {
-    mailRules(){
+    mailRules () {
       return [
         val => val && val.length > 0 || 'Contraseña obligatoria',
         val => /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/.test(val) || 'Formato inválido para correo',
       ]
     },
-    ConfirmPassword(){
+    ConfirmPassword () {
       return [
         val => val && val.length > 0 || 'Campo requerido',
         val => val === this.fields.passwd.data || 'Las contraseñas no coinciden'
