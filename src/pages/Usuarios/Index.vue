@@ -52,6 +52,7 @@
 import { axiosInstance } from 'boot/axios'
 import FormComponent from 'components/Users/Form'
 import { ref } from 'vue'
+import { Cookies } from 'quasar'
 
 export default {
   name: 'Index',
@@ -75,11 +76,15 @@ export default {
     this.getData()
     setInterval(() => {
       this.getData()
-    }, 5000)
+    }, 3000)
   },
   methods: {
     getData () {
-      axiosInstance.get(this.uri).then(res => {
+      axiosInstance.get(this.uri, {
+        headers: {
+          Authorization: 'Bearer ' + this.$q.cookies.get('authToken')
+        }
+      }).then(res => {
         this.users = res.data.response
       }).catch(err => {
         console.error(err)
@@ -116,7 +121,25 @@ export default {
         this.erase(itm)
       })
     },
-    erase (itm) {},
+    erase (itm) {
+      var uri = 'usuarios/delete/' + itm
+      var params = new FormData()
+      params.append('_method', 'DELETE')
+      axiosInstance['post'](uri, params, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: 'Bearer ' + this.$q.cookies.get('authToken')
+        }
+      }).then(res => {
+        if (res.data.deleted == true) {
+          this.notificacion('Exito', 'Registro eliminado', 'green-10')
+        } else {
+          this.notificacion('Error', 'Algo ha salido mal', 'red-10')
+        }
+      }).catch(() => {
+        this.notification('Error', 'Comunicate con tu admin!', 'red-10')
+      }).finally(() => {})
+    },
     notificacion (message, caption, color) {
       this.$q.notify({
         message: message,

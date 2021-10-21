@@ -30,6 +30,42 @@ const routes = [
     ]
   },
   {
+    path: '/clientes',
+    component: () => import('layouts/MainLayout'),
+    children: [
+      {
+        path: '',
+        component: () => import('pages/Clientes/Index'),
+        name: 'clientes',
+        beforeEnter: auth
+      }
+    ]
+  },
+  {
+    path: '/planes',
+    component: () => import('layouts/MainLayout'),
+    children: [
+      {
+        path: '',
+        component: () => import('pages/Planes/Index'),
+        name: 'planes',
+        beforeEnter: auth
+      }
+    ]
+  },
+  {
+    path: '/pagos',
+    component: () => import('layouts/MainLayout'),
+    children: [
+      {
+        path: '',
+        component: () => import('pages/Pagos/Index'),
+        name: 'pagos',
+        beforeEnter: auth
+      }
+    ]
+  },
+  {
     path: '/usuarios',
     component: () => import('layouts/MainLayout'),
     children: [

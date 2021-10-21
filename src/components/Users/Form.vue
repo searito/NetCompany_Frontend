@@ -77,8 +77,6 @@
                        dense
                        clearable
                        label="Contraseña"
-                       required
-                       :rules="[ val => val && val.length > 0 || 'Contraseña no ingresada']"
                        counter
                        maxlength="10"
                        ref="txt_pwd"
@@ -105,7 +103,6 @@
                        dense
                        clearable
                        label="Repite la contraseña"
-                       required
                        :rules="ConfirmPassword"
                        counter
                        maxlength="10"
@@ -181,6 +178,8 @@
 
 <script>
 import { ref } from 'vue'
+import { axiosInstance } from 'boot/axios'
+import { Cookies } from 'quasar'
 
 export default {
   name: 'Form',
@@ -219,13 +218,13 @@ export default {
   computed: {
     mailRules () {
       return [
-        val => val && val.length > 0 || 'Contraseña obligatoria',
+        val => val && val.length > 0 || 'Campo requerido',
         val => /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/.test(val) || 'Formato inválido para correo',
       ]
     },
     ConfirmPassword () {
       return [
-        val => val && val.length > 0 || 'Campo requerido',
+        // val => val && val.length > 0 || 'Campo requerido',
         val => val === this.fields.passwd.data || 'Las contraseñas no coinciden'
       ]
     }
@@ -237,8 +236,106 @@ export default {
     hide () {
       this.$refs.dialog.hide()
     },
-    edit () {},
-    almacenar () {}
+    edit () {
+      var uri = 'usuarios/edit/' + this.id
+      axiosInstance.get(uri, {
+        headers: {
+          Authorization: 'Bearer ' + this.$q.cookies.get('authToken')
+        }
+      }).then(res => {
+        var reg = res.data.response
+        var state
+        reg.estado ? state = true : state = false
+        this.fields.nombres.data = reg.name
+        this.fields.apellidos.data = reg.lastname
+        this.fields.correo.data = reg.email
+        this.fields.nivel.data = reg.level
+        this.fields.estado.data = state
+      }).catch(err => {
+        console.error(err)
+      }).finally(() => {})
+    },
+    almacenar () {
+      var uri = 'usuarios'
+      var params = new FormData()
+      var estado = null
+      this.loading = true
+      for (var field in this.fields) {
+        if (this.fields[field].error !== undefined) {
+          this.fields[field].error = false;
+          this.fields[field]['error-message'] = '';
+        }
+      }
+      this.fields.estado.data === true ? estado = 1 : estado = 0
+      params.append('nombres', this.fields.nombres.data)
+      params.append('apellidos', this.fields.apellidos.data)
+      params.append('correo', this.fields.correo.data)
+      params.append('nivel', this.fields.nivel.data)
+      params.append('estado', estado)
+      if (this.fields.passwd.data !== null) {
+        params.append('password', this.fields.passwd.data)
+      }
+      this.errores = {}
+      if (this.id === 0){
+        params.append('_method', 'POST')
+      } else {
+        params.append('id', this.id)
+        params.append('_method', 'PUT')
+      }
+      axiosInstance['post'](uri, params, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: 'Bearer ' + this.$q.cookies.get('authToken')
+        }
+      }).then(res => {
+        switch (res.data.response) {
+          case 200:
+            this.notificacion('Exito', 'Registro almacenado', 'green-10')
+            this.hide()
+            break
+          case 500:
+            this.notificacion('Error', 'Revisa la información ingresada', 'red-10')
+            break
+        }
+      }).catch(err => {
+        if (err.response.status === 422) {
+          this.errores = err.response.data.errors
+          for (var field in this.fields) {
+            if (this.fields[field].error !== undefined) {
+              if (this.errores !== undefined) {
+                if (this.errores[field] !== undefined) {
+                  this.fields[field].error = true
+                  this.fields[field]['error-message'] = this.errores[field][0]
+                } else {
+                  this.fields[field].error = false
+                  this.fields[field]['error-message'] = ''
+                }
+              }
+            }
+          }
+          this.notification('Error', 'Revisa la información ingresada', 'red-10')
+        } else {
+          this.notification('Error', 'Comunicate con tu administrador', 'red-10')
+        }
+      }).finally(() => {
+        setTimeout(() => {
+          this.loading = false
+        }, 1000)
+      })
+    },
+    notificacion (message, caption, color) {
+      this.$q.notify({
+        message: message,
+        caption: caption,
+        position: 'top-right',
+        color: color,
+        avatar: '/icons/favicon-128x128.png',
+        progress: true,
+        actions: [
+          { icon: 'close', color: 'white' }
+        ]
+      })
+    }
   }
 }
 </script>
